@@ -7,7 +7,7 @@ import streamlit as st
 
 import openai
 
-openai.api_key = "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"
+openai.api_key = "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"
 
 prompt = "i am learning python give me exercise to practice if-else"
 def llm(context,system="You are a helpful assistant."):

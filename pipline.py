@@ -136,9 +136,29 @@ def next_question(user_data:dict)->str:
 
 
 
+def first_question(user_data:dict)->str:
+    return generate_first_question(user_data)
+
+def feedback_maker(answer, user_data)->str:
+    return generate_feedback(answer, user_data)
+    
+def next_question(user_data:dict)->str:
+    return generate_next_question(user_data)
+
+# def next_question(questoin:str,answer:str,user_dict:dict)->str:
+#     subtopic = subtopic_chain(questoin=questoin, answer=answer)
+#     return next_question_chain(topic = user_dict["subject"],subtopic=subtopic)
 
 
 
 
+
+
+
+if __name__ == "__main__":
+    user_profile = {"language": "python", "level" : None, "user_name" : None, "subject": "dictionary", "weaknesses": None}
+    q=generate_question(user_profile)
+    print("Q: "+q+"\n")
+    print(next_question(q,input("enter answer"),user_profile))
 
 

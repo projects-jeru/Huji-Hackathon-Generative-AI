@@ -5,6 +5,8 @@ from streamlit import session_state as state
 import streamlit_ace as st_ace
 import pipline
 import subprocess
+from PIL import Image
+image = Image.open('HackEnv/pics/Codi.png')
 
 if "app" not in state:
     state.app = "model"
@@ -42,10 +44,11 @@ def __run_code():
                     ).stdout
 
 
-#First Screen - Choose your name
+# First Screen - Getting user's info.
 if not state.user_live:
     with header_row.container():
-        st.title("Welcome to Codi! \n Lets get to know you! 💬") 
+        st.title("Hi, I'm Codi! \n Before you begin your quest to success let's start by getting to know you 💬")
+        st.image(image)
     with middle_row.container():
     
         user_name = st.text_input("What's your name?")
@@ -81,13 +84,12 @@ if not state.user_live:
     
     print(state.user_profile)
     
-#Third Screen - start Questions
+# Second Screen - Questions
 
 elif state.started == "question":
     with header_row.container():
             
         st.title("Answer the following question ✍️")
-        #first_question = example_question
         st.write(state.question)
         state.user_code = st_ace.st_ace(language="python") 
         Submit, run = st.columns(2)
@@ -98,11 +100,12 @@ elif state.started == "question":
 
 elif state.started == "feedback":
     with header_row.container():
-        st.title("Here is the answer 📖")
         
-        st.code(state.chat_answer, language="python")
         st.title("How did you do? 🤔")
-        #first_question = example_question
         st.write(state.feedback_maker)
+
+        st.title("Here is a possible answer 📖")
+        st.code(state.chat_answer, language="python")
+
         st.button("Next Question",on_click=__next_question) 
         

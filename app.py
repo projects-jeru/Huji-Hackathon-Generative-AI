@@ -94,7 +94,7 @@ if state.started:
     first_question = example_question
     #first_question = pipline.generate_question(state.user_profile)
     middle_row.write(first_question)
-    user_code = st_ace("Write your code here")
+    user_code = st_ace("Write your code here") 
     middle_row.code(user_code, state.user_profile["language"])
     submit_code = st.button("Submit your code")
     run_code = st.button("Run your code")

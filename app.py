@@ -4,110 +4,103 @@ import streamlit as st
 from streamlit import session_state as state
 import streamlit_ace as st_ace
 import pipline
+import subprocess
 
 if "app" not in state:
     state.app = "model"
-    state.out = ""
-    state.user_name = None
-    state.language = None 
-    state.level = None
-    state.started = False
-    state.user_profile = {"language": None, "level" : None, "user_name" : None, "subject": None, "weaknesses": None}
+    state.out = None
+    state.started = None
+    state.user_profile = {"language": None, "level" : None, "user_name" : None, "subject": None, "params": [0,0,0,0,0,0]}
+    state.user_live = False
+    state.question = None
+    state.user_code = None
 
 
 example_question = "Here's a detailed Python question about for loops for a beginner level:\n Question: \n Write a program that calculates the sum of all the even numbers from 1 to a given positive integer, n. The program should use a for loop to iterate over the numbers and add up the even ones. Finally, it should print the total sum. \n Example: \n If the input value of n is 10, the program should calculate the sum of all even numbers from 1 to 10 (inclusive), which are 2, 4, 6, 8, and 10. The sum of these numbers is 30, so the program should output: \n Example code: \n The sum of all even numbers from 1 to 10 is 30. \n Your task is to write the Python code to solve this problem using a for loop. Good luck!"
 
-header_row = st.container()
-middle_row = st.container()
-bottom_row = st.container()
+header_row = st.empty()
+middle_row = st.empty()
 
 def __user_data(lang, lvl, subject):
     state.user_profile["language"] = lang
     state.user_profile["level"] = lvl
     state.user_profile["subject"] = subject
 
+def __feedback_maker():
+    state.started = "feedback"
+    state.feedback_maker = pipline.feedback_maker(state.user_code,state.user_profile)
 
-def __run_TTI():
-    with bottom_row.empty():
-        bottom_row.markdown(":green[Running pipline]")
-        bottom_row.write(pipline.chain_TI(state.input_text)['text'])
+def __next_question():
+    state.started = "question"
+    state.question = pipline.next_question(state.question, state.user_code, state.user_profile)
 
+def __run_code():
+    state.out = subprocess.run(
+                        ["python", "-c", state.user_code],
+                        capture_output=True,
+                        text=True,
+                    ).stdout
 
-def __run_CC():
-    with bottom_row.empty():
-        bottom_row.markdown(":green[Running pipline]")
-        words = state.input_text.rstrip().split()
-        if len(words) != 2:
-            bottom_row.error("Please enter two terms")
-        else:
-            bottom_row.write(pipline.chain_CC({"term1": words[0], "term2": words[1]})['text'])
 
 #First Screen - Choose your name
-if state.user_profile["user_name"] == None:
-    header_row.title("Welcome to _____! \n What's your name?") 
-    user_name = header_row.text_input("")
-    if user_name:
-        header_row.write(f"Hi {user_name}, Nice to meet you.")
-        continue_button = header_row.button("Lets get started")
-        if continue_button:
-            state.user_profile["user_name"] = user_name
+if not state.user_live:
+    with header_row.container():
+        st.title("Welcome to Codi! \n Lets get to know you! 💬") 
+    with middle_row.container():
+    
+        user_name = st.text_input("What's your name?")
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            chosen_lang = st.radio("Prefered pratice language:", ('Python', 'C++', 'JavaScript'))
+            if chosen_lang == 'Python':
+                st.write('You selected Python. 🎉')
+            else:
+                st.write("You didn\'t select Python.😥")
+        
+        with col2:
+            user_lvl = st.slider("What's your mastery level?", 1, 10)
+            st.write("My mastery level is:", user_lvl)
+        
+        with col3: 
+            subject = st.multiselect("What subject do you wanna study?", ['If-Else', 'While loops', 'For loops', 'Funny stuff'])
+        
+        submit_button = st.button("Lets start! 🌟")
+        if submit_button and chosen_lang == 'Python' and subject:
+            if not subject:
+                st.error("Woops! You haven't chosen a subject to study", icon="😮")
+            else:
+                state.started = "question"
+                state.user_live = True
+                __user_data(chosen_lang, user_lvl, subject)
+                st.balloons()
+                state.question = pipline.first_question(state.user_profile)
+                st.experimental_rerun()
+                
 
-
-#Second Screen - Choose your language, level, subject
-elif state.user_profile["language"] == None:
-    header_row.title("Lets get to know you! 💬")
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        chosen_lang = st.radio("Prefered pratice language:", ('Python', 'C++', 'JavaScript'))
-        if chosen_lang == 'Python':
-            st.write('You selected Python. 🎉')
-        else:
-            st.write("You didn\'t select Python.😥")
-    
-    with col2:
-        user_lvl = st.slider("What's your mastery level?", 0, 10)
-        st.write("My mastery level is:", user_lvl)
-    
-    with col3: 
-        subject = st.multiselect("What subject do you wanna study?", ['If-Else', 'While loops', 'For loops', 'Funny stuff'])
-    
-    submit_button = st.button("Lets start! 🌟")
-    if submit_button and chosen_lang == 'Python' and subject:
-        state.started = True
-        __user_data(chosen_lang, user_lvl, subject)
-        st.empty()
-
-    if not subject:
-        st.error("Woops! You haven't chosen a subject to study", icon="😮")
-    
     
     print(state.user_profile)
-    
-        
     
 #Third Screen - start Questions
  # todo - when do we know to start the questions
 
-if state.started:
-    st.balloons()
-    header_row.title("Answer the following question")
-    #first_question = example_question
-    first_question = pipline.generate_question(state.user_profile)
-    middle_row.write(first_question)
-    user_code = st_ace.st_ace(language="python",auto_update=True) 
-    submit_code = st.button("Submit your code")
-    run_code = st.button("Run your code")
-    if run_code:
-        exec(user_code)
-    if submit_code:
-        first_question = pipline.next_question(first_question, str(user_code), state.user_profile)
-
-
+elif state.started == "question":
+    with header_row.container():
+            
+            
     
-    
-# else:
-#     bottom_row.header("Output")
-#     header_row.text_area("enter text", key="input_text")
-#     tti_button , cc_button = header_row.columns(2)
-#     tti_button.button("What are you trying to imply?", on_click=__run_TTI)
-#     cc_button.button("What is the connection between the two terms?", on_click=__run_CC)
+        st.title("Answer the following question")
+        #first_question = example_question
+        st.write(state.question)
+        state.user_code = st_ace.st_ace(language="python") 
+        Submit, run = st.columns(2)
+        st.text(state.out)
+        Submit.button("Submit and get new question",on_click=__feedback_maker)
+        run.button("run code",on_click=__run_code)
+            
+
+elif state.started == "feedback":
+    with header_row.container():
+        st.title("feedback question")
+        #first_question = example_question
+        st.write(state.feedback_maker)
+        st.button("next question",on_click=__next_question) 

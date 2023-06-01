@@ -8,9 +8,10 @@ import re
 
 import openai
 
-RATING_REGEX = "[{}]"
+RATING_REGEX = r"\[( ?\'(?P<DIGITS>[0-9]|10)\'?,? ?){6}\]"
+INT_REGEX = r"\b\d+\b"
 
-openai.api_key = "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"
+openai.api_key = "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"
 cur_question = None
 cur_answer = None
 feedback = None
@@ -95,14 +96,17 @@ def generate_first_question(user_data):
     return cur_question
 
 def generate_feedback(answer, user_data):
-    feedback = llm(feedback_template(answer)).strip('][').split(', ')
-    print("feedback " , feedback)
-    for i in range(6):
-        user_data['params'][i] = int(feedback[i])
-        print(user_data)
+    feedback = llm(feedback_template(answer))
+    match = re.findall(RATING_REGEX, feedback)[0]
+    ints = re.findall(INT_REGEX, "\b\d+\b")
+    
+    print("feedback" , feedback)
+    # for i in range():
+    #     user_data['params'][i] = int(feedback[i])
+    #     print(user_data)
 
-    analysis = llm(analysis_template(answer))
-    return analysis
+    # analysis = llm(analysis_template(answer))
+    # return analysis
 
 def generate_next_question(user_data):
     cur_question = llm(next_question_template(user_data))

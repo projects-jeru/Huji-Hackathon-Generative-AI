@@ -91,21 +91,18 @@ elif state.user_profile["language"] == None:
 if state.started:
     st.balloons()
     header_row.title("Answer the following question")
-    first_question = example_question
-    #first_question = pipline.generate_question(state.user_profile)
+    #first_question = example_question
+    first_question = pipline.generate_question(state.user_profile)
     middle_row.write(first_question)
-    user_code = st_ace("Write your code here") 
-    middle_row.code(user_code, state.user_profile["language"])
+    user_code = st_ace.st_ace(language="python",auto_update=True) 
     submit_code = st.button("Submit your code")
     run_code = st.button("Run your code")
     if run_code:
         exec(user_code)
     if submit_code:
-        pipline.next_question(first_question, str(user_code), state.user_profile)
+        first_question = pipline.next_question(first_question, str(user_code), state.user_profile)
 
 
-
-print('hey')
     
     
 # else:

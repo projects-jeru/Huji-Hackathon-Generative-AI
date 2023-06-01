@@ -11,9 +11,10 @@ import openai
 RATING_REGEX = r"\[( ?\'(?P<DIGITS>[0-9]|10)\'?,? ?){6}\]"
 INT_REGEX = r"\b\d+\b"
 
-openai.api_key = "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"
+openai.api_key = "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"
 cur_question = None
 cur_answer = None
+chat_answer = None
 feedback = None
 
 prompt = "i am learning python give me exercise to practice coding"
@@ -27,29 +28,23 @@ def llm(context,system="You are a helpful assistant."):
     )
     return response['choices'][0]['message']['content']
 
-# # save 
+
 generate_question_template =lambda user: f"""Write a simple question in Python coding language:
 The question should be in this topic:{user['subject']}
 If the scale of a coding question's difficulty was from 1-10, this question would be in a difficulty of:{user['level']}
 The question should be clear and simple.
-The question should include a function name and expected output.
-The question should include an example usage of the function.
+The question should include a function name.
+The question should include 3 different expected outputs of the function.
 Let's think step by step, and write the code
 code: 
 ```python
 
 """
 
-
-# subtopic_template = lambda questoin, answer:f"""Kim answered the question {questoin},
-# her answer was {answer}.
-# The list of topics that Kim does not seem to know:
-# 1."""
-
+generate_possible_answer =lambda question: f"""Please return only the coding solution for this question and nothing else: {question}"""
 
 next_question_template = lambda user:f"""Write a simple question in Python coding language:
-The question should be in this topic:{user['subject']}
-If the scale of a coding question's difficulty was from 1-10, this question would be in a difficulty of:{user['level']}
+The question should be in this subject:{user['subject']}
 We know that the user has this rating on his level (from 1-10, 1 being the worst and 10 being the best) in these topics:
 He is {user['params'][0]} in Readability and Formatting(Code Style and Conventions),
 He is {user['params'][1]} in Logic and Structure,
@@ -57,15 +52,16 @@ He is {user['params'][2]} in Input Handling,
 He is {user['params'][3]} in Efficiency,
 He is {user['params'][4]} in Modularity,
 He is {user['params'][5]} in Error Handling.
+The question should help the user get better on the topic with the lowest score between the topics I just listed.
 The question should be clear and simple.
 The question should include a function name and expected output.
 The question should include an example result of using the function.
+AGAIN - DONT GIVE A SOLUTION TO THE QUESTION!
 Let's think step by step, and write the code
 code: 
 ```python
 
 """
-
 
 feedback_template = lambda answer:f"""A user was give this question:
 question = '''
@@ -97,16 +93,19 @@ def generate_first_question(user_data):
 
 def generate_feedback(answer, user_data):
     feedback = llm(feedback_template(answer))
-    match = re.findall(RATING_REGEX, feedback)[0]
-    ints = re.findall(INT_REGEX, "\b\d+\b")
+    # match = re.findall(RATING_REGEX, feedback)
+    ints = re.findall(INT_REGEX, feedback)
     
-    print("feedback" , feedback)
-    # for i in range():
-    #     user_data['params'][i] = int(feedback[i])
-    #     print(user_data)
+    for i in range(6):
+        user_data['params'][i] = int(ints[i])
 
-    # analysis = llm(analysis_template(answer))
-    # return analysis
+    analysis = llm(analysis_template(answer))
+    print(user_data)
+    return analysis
+
+def build_possible_answer(question):
+    chat_answer = llm(generate_possible_answer(question))
+    return chat_answer
 
 def generate_next_question(user_data):
     cur_question = llm(next_question_template(user_data))
@@ -114,12 +113,6 @@ def generate_next_question(user_data):
 
 
 
-# def subtopic_chain(questoin,answer):
-#     return llm(subtopic_template(questoin,answer))
-# def next_question_chain(topic,subtopic):
-#     return llm(next_question_template(topic,subtopic))
-
-
 def first_question(user_data:dict)->str:
     return generate_first_question(user_data)
 
@@ -128,11 +121,6 @@ def feedback_maker(answer, user_data)->str:
     
 def next_question(user_data:dict)->str:
     return generate_next_question(user_data)
-
-# def next_question(questoin:str,answer:str,user_dict:dict)->str:
-#     subtopic = subtopic_chain(questoin=questoin, answer=answer)
-#     return next_question_chain(topic = user_dict["subject"],subtopic=subtopic)
-
 
 
 
@@ -144,21 +132,12 @@ def feedback_maker(answer, user_data)->str:
     
 def next_question(user_data:dict)->str:
     return generate_next_question(user_data)
-
-# def next_question(questoin:str,answer:str,user_dict:dict)->str:
-#     subtopic = subtopic_chain(questoin=questoin, answer=answer)
-#     return next_question_chain(topic = user_dict["subject"],subtopic=subtopic)
-
-
-
 
 
 
 
 if __name__ == "__main__":
-    user_profile = {"language": "python", "level" : None, "user_name" : None, "subject": "dictionary", "weaknesses": None}
-    q=generate_question(user_profile)
-    print("Q: "+q+"\n")
-    print(next_question(q,input("enter answer"),user_profile))
+    user_profile = {"language": None, "level" : None, "user_name" : None, "subject": None, "params": [0,0,0,0,0,0]}
+    
 
 

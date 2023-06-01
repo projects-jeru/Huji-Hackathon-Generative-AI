@@ -14,9 +14,8 @@ if "app" not in state:
     state.user_live = False
     state.question = None
     state.user_code = None
+    state.chat_answer = None
 
-
-example_question = "Here's a detailed Python question about for loops for a beginner level:\n Question: \n Write a program that calculates the sum of all the even numbers from 1 to a given positive integer, n. The program should use a for loop to iterate over the numbers and add up the even ones. Finally, it should print the total sum. \n Example: \n If the input value of n is 10, the program should calculate the sum of all even numbers from 1 to 10 (inclusive), which are 2, 4, 6, 8, and 10. The sum of these numbers is 30, so the program should output: \n Example code: \n The sum of all even numbers from 1 to 10 is 30. \n Your task is to write the Python code to solve this problem using a for loop. Good luck!"
 
 header_row = st.empty()
 middle_row = st.empty()
@@ -32,7 +31,8 @@ def __feedback_maker():
 
 def __next_question():
     state.started = "question"
-    state.question = pipline.next_question(state.question, state.user_code, state.user_profile)
+    state.question = pipline.next_question(state.user_profile)
+    state.chat_answer = pipline.build_possible_answer(state.question)
 
 def __run_code():
     state.out = subprocess.run(
@@ -53,9 +53,9 @@ if not state.user_live:
         with col1:
             chosen_lang = st.radio("Prefered pratice language:", ('Python', 'C++', 'JavaScript'))
             if chosen_lang == 'Python':
-                st.write('You selected Python. 🎉')
+                st.write("You've selected Python. 🎉")
             else:
-                st.write("You didn\'t select Python.😥")
+                st.write("You've didn\'t select Python.😥")
         
         with col2:
             user_lvl = st.slider("What's your mastery level?", 1, 10)
@@ -74,6 +74,7 @@ if not state.user_live:
                 __user_data(chosen_lang, user_lvl, subject)
                 st.balloons()
                 state.question = pipline.first_question(state.user_profile)
+                state.chat_answer = pipline.build_possible_answer(state.question)
                 st.experimental_rerun()
                 
 
@@ -81,26 +82,27 @@ if not state.user_live:
     print(state.user_profile)
     
 #Third Screen - start Questions
- # todo - when do we know to start the questions
 
 elif state.started == "question":
     with header_row.container():
             
-            
-    
-        st.title("Answer the following question")
+        st.title("Answer the following question ✍️")
         #first_question = example_question
         st.write(state.question)
         state.user_code = st_ace.st_ace(language="python") 
         Submit, run = st.columns(2)
         st.text(state.out)
         Submit.button("Submit and get new question",on_click=__feedback_maker)
-        run.button("run code",on_click=__run_code)
+        run.button("Run Code ▶️",on_click=__run_code)
             
 
 elif state.started == "feedback":
     with header_row.container():
-        st.title("feedback question")
+        st.title("Here is the answer 📖")
+        
+        st.code(state.chat_answer, language="python")
+        st.title("How did you do? 🤔")
         #first_question = example_question
         st.write(state.feedback_maker)
-        st.button("next question",on_click=__next_question) 
+        st.button("Next Question",on_click=__next_question) 
+        

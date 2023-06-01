@@ -11,14 +11,14 @@ import openai
 RATING_REGEX = r"\[( ?\'(?P<DIGITS>[0-9]|10)\'?,? ?){6}\]"
 INT_REGEX = r"\b\d+\b"
 
-openai.api_key = "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"
+openai.api_key = "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"
 cur_question = None
 cur_answer = None
 chat_answer = None
 feedback = None
 
-prompt = "i am learning python give me exercise to practice coding"
-def llm(context,system="You are a helpful assistant."):
+system_prompt = "You are an engine that generates customized programming questions, you try to understand what the person needs to learn and accordingly write the questions"
+def llm(context,system=system_prompt):
     response = openai.ChatCompletion.create(
     model="gpt-3.5-turbo-0301",
     messages=[
@@ -29,13 +29,15 @@ def llm(context,system="You are a helpful assistant."):
     return response['choices'][0]['message']['content']
 
 
-generate_question_template =lambda user: f"""Write a simple question in Python coding language:
+generate_question_template =lambda user: f"""
+Write a simple question in Python coding language:
 The question should be in this topic:{user['subject']}
 If the scale of a coding question's difficulty was from 1-10, this question would be in a difficulty of:{user['level']}
 The question should be clear and simple.
 The question should include a function name.
 The question should include 3 different expected outputs of the function.
-Let's think step by step, and write the code
+Do not include code example.
+Let's think step by step
 code: 
 ```python
 
@@ -52,11 +54,10 @@ He is {user['params'][2]} in Input Handling,
 He is {user['params'][3]} in Efficiency,
 He is {user['params'][4]} in Modularity,
 He is {user['params'][5]} in Error Handling.
-The question should help the user get better on the topic with the lowest score between the topics I just listed.
 The question should be clear and simple.
 The question should include a function name and expected output.
 The question should include an example result of using the function.
-AGAIN - DONT GIVE A SOLUTION TO THE QUESTION!
+Do not include code example.
 Let's think step by step, and write the code
 code: 
 ```python

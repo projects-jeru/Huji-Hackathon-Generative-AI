@@ -47,25 +47,25 @@ def __run_code():
 # First Screen - Getting user's info.
 if not state.user_live:
     with header_row.container():
-        st.title("Hi, I'm Codi! \n Before you begin your quest to success let's start by getting to know you 💬")
+        st.title("Hi, I'm Codi! 👋 \n Before you begin your quest to success let's start by getting to know you!")
         st.image(image)
     with middle_row.container():
     
-        user_name = st.text_input("What's your name?")
+        user_name = st.text_input("What's your name? 💬")
         col1, col2, col3 = st.columns(3)
         with col1:
-            chosen_lang = st.radio("Prefered pratice language:", ('Python', 'C++', 'JavaScript'))
+            chosen_lang = st.radio("Prefered pratice language: 💻", ('Python', 'C++', 'JavaScript'))
             if chosen_lang == 'Python':
                 st.write("You've selected Python. 🎉")
             else:
-                st.write("You've didn\'t select Python.😥")
+                st.write("You didn't select Python.😥")
         
         with col2:
-            user_lvl = st.slider("What's your mastery level?", 1, 10)
+            user_lvl = st.slider("What's your mastery level? 🏗️", 1, 10)
             st.write("My mastery level is:", user_lvl)
         
         with col3: 
-            subject = st.multiselect("What subject do you wanna study?", ['If-Else', 'While loops', 'For loops', 'Funny stuff'])
+            subject = st.multiselect("What subject do you wanna study? 📚", ['If-Else', 'While loops', 'For loops', 'String manipulation', 'Recursion', 'Backtracking'])
         
         submit_button = st.button("Lets start! 🌟")
         if submit_button and chosen_lang == 'Python' and subject:
@@ -94,7 +94,7 @@ elif state.started == "question":
         state.user_code = st_ace.st_ace(language="python") 
         Submit, run = st.columns(2)
         st.text(state.out)
-        Submit.button("Submit and get new question",on_click=__feedback_maker)
+        Submit.button("Submit Answer 📫",on_click=__feedback_maker)
         run.button("Run Code ▶️",on_click=__run_code)
             
 

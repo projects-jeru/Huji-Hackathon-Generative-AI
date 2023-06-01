@@ -4,12 +4,18 @@ from langchain.prompts import load_prompt
 import wikipedia
 import os
 import streamlit as st
+import re
 
 import openai
 
-openai.api_key = "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"
+RATING_REGEX = "[{}]"
 
-prompt = "i am learning python give me exercise to practice if-else"
+openai.api_key = "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"
+cur_question = None
+cur_answer = None
+feedback = None
+
+prompt = "i am learning python give me exercise to practice coding"
 def llm(context,system="You are a helpful assistant."):
     response = openai.ChatCompletion.create(
     model="gpt-3.5-turbo-0301",
@@ -21,9 +27,12 @@ def llm(context,system="You are a helpful assistant."):
     return response['choices'][0]['message']['content']
 
 # # save 
-generate_question_template =lambda topic: f"""Write a simple question in Python:
-The question should be in this topic:{topic}
-The question should be clear and simple, without any difficulties
+generate_question_template =lambda user: f"""Write a simple question in Python coding language:
+The question should be in this topic:{user['subject']}
+If the scale of a coding question's difficulty was from 1-10, this question would be in a difficulty of:{user['level']}
+The question should be clear and simple.
+The question should include a function name and expected output.
+The question should include an example usage of the function.
 Let's think step by step, and write the code
 code: 
 ```python
@@ -31,46 +40,101 @@ code:
 """
 
 
-subtopic_template = lambda questoin, answer:f"""Kim answered the question {questoin},
-her answer was {answer}.
-The list of topics that Kim does not seem to know:
-1."""
+# subtopic_template = lambda questoin, answer:f"""Kim answered the question {questoin},
+# her answer was {answer}.
+# The list of topics that Kim does not seem to know:
+# 1."""
 
 
-next_question_template = lambda topic, subtopics:f"""Write a short code question that deals with this topic:{topic}
-and refers to these sub-topics:{subtopics}
-The question should be clear and simple, without any difficulties
+next_question_template = lambda user:f"""Write a simple question in Python coding language:
+The question should be in this topic:{user['subject']}
+If the scale of a coding question's difficulty was from 1-10, this question would be in a difficulty of:{user['level']}
+We know that the user has this rating on his level (from 1-10, 1 being the worst and 10 being the best) in these topics:
+He is {user['params'][0]} in Readability and Formatting(Code Style and Conventions),
+He is {user['params'][1]} in Logic and Structure,
+He is {user['params'][2]} in Input Handling,
+He is {user['params'][3]} in Efficiency,
+He is {user['params'][4]} in Modularity,
+He is {user['params'][5]} in Error Handling.
+The question should be clear and simple.
+The question should include a function name and expected output.
+The question should include an example result of using the function.
 Let's think step by step, and write the code
 code: 
-```python"""
+```python
 
-def generate_question_chain(topic):
-    return llm(generate_question_template(topic))
-def subtopic_chain(questoin,answer):
-    return llm(subtopic_template(questoin,answer))
-def next_question_chain(topic,subtopic):
-    return llm(next_question_template(topic,subtopic))
+"""
 
 
-def generate_question(user_data:dict)->str:
-    return generate_question_chain(topic=user_data["subject"])
+feedback_template = lambda answer:f"""A user was give this question:
+question = '''
+{cur_question}
+'''
+Analyse this answer for the question above based on the topics of:
+ Readability and Formatting(Code Style and Conventions) , 
+ Logic and Structure, Input Handling, Efficiency, Modularity, Error Handling. 
+ Then give it a rating of 1-10 (1 being the worst and 10 being the best) and 
+ return the output in a format of a list that looks like this [*rating*,*rating*,*rating*,*rating*,*rating*,*rating*] 
+ in the respective order. please return only that list without saying anything else:
+{answer}
+"""
+
+analysis_template = lambda answer:f"""A user was give this question:
+question = '''
+{cur_question}
+'''
+Analyse this answer for the question above based on the topics of:
+ Readability and Formatting(Code Style and Conventions) , 
+ Logic and Structure, Input Handling, Efficiency, Modularity, Error Handling. 
+ Then give it a rating of 1-10 (1 being the worst and 10 being the best):
+{answer}
+"""
+
+def generate_first_question(user_data):
+    cur_question = llm(generate_question_template(user_data))
+    return cur_question
+
+def generate_feedback(answer, user_data):
+    feedback = llm(feedback_template(answer)).strip('][').split(', ')
+    print("feedback " , feedback)
+    for i in range(6):
+        user_data['params'][i] = int(feedback[i])
+        print(user_data)
+
+    analysis = llm(analysis_template(answer))
+    return analysis
+
+def generate_next_question(user_data):
+    cur_question = llm(next_question_template(user_data))
+    return cur_question
+
+
+
+# def subtopic_chain(questoin,answer):
+#     return llm(subtopic_template(questoin,answer))
+# def next_question_chain(topic,subtopic):
+#     return llm(next_question_template(topic,subtopic))
+
+
+def first_question(user_data:dict)->str:
+    return generate_first_question(user_data)
+
+def feedback_maker(answer, user_data)->str:
+    return generate_feedback(answer, user_data)
     
+def next_question(user_data:dict)->str:
+    return generate_next_question(user_data)
 
-
-def next_question(questoin:str,answer:str,user_dict:dict)->str:
-    subtopic = subtopic_chain(questoin=questoin, answer=answer)
-    return next_question_chain(topic = user_dict["subject"],subtopic=subtopic)
-
-
-
-
+# def next_question(questoin:str,answer:str,user_dict:dict)->str:
+#     subtopic = subtopic_chain(questoin=questoin, answer=answer)
+#     return next_question_chain(topic = user_dict["subject"],subtopic=subtopic)
 
 
 
-if __name__ == "__main__":
-    user_profile = {"language": "python", "level" : None, "user_name" : None, "subject": "dictionary", "weaknesses": None}
-    q=generate_question(user_profile)
-    print("Q: "+q+"\n")
-    print(next_question(q,input("enter answer"),user_profile))
+
+
+
+
+
 
 

@@ -4,7 +4,7 @@ from langchain.prompts import load_prompt
 import wikipedia
 import os
 
-llm = OpenAI()
+llm = OpenAI(openai_api_key='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')
 # save templates to a file
 try_imply_template = """Question:
  The user wrote me the following text, what is he trying to imply to me?

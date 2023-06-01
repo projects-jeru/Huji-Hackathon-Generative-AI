@@ -1,7 +1,7 @@
 streamlit==1.22.*
 requests==2.27.*
 sentencepiece==0.1.*
-torch==2.*
+torch==1.*
 transformers==4.*
 streamlit-ace
 langchain

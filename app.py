@@ -8,7 +8,7 @@ def get_key():
     if st.secrets["api_key"]:
         return st.secrets["api_key"]
     else:
-        return st.input_text("enter key",key="key)
+        return st.text_input("enter key",key="key)
 
 if "app" not in state:
     state.app = "model"

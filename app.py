@@ -1,5 +1,3 @@
-import subprocess
-import torch
 import streamlit as st
 from streamlit import session_state as state
 import streamlit_ace as st_ace

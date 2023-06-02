@@ -6,6 +6,11 @@ import streamlit_ace as st_ace
 import pipline
 import subprocess
 from PIL import Image
+def get_key():
+    if st.secrets["api_key"]:
+        return st.secrets["api_key"]
+    else:
+        return st.input_text("enter key")
 image = Image.open('HackEnv/pics/Codi.png')
 
 if "app" not in state:

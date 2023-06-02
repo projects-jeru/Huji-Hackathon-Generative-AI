@@ -9,7 +9,6 @@ def get_key():
         return st.secrets["api_key"]
     else:
         return st.input_text("enter key")
-image = Image.open('HackEnv/pics/Codi.png')
 
 if "app" not in state:
     state.app = "model"
@@ -52,7 +51,6 @@ def __run_code():
 if not state.user_live:
     with header_row.container():
         st.title("Hi, I'm Codi! 👋 \n Before you begin your quest to success let's start by getting to know you!")
-        st.image(image)
     with middle_row.container():
     
         user_name = st.text_input("What's your name? 💬")

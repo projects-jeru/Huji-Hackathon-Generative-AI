@@ -53,7 +53,7 @@ if not state.user_live:
         st.title("Hi, I'm Codi! 👋 \n Before you begin your quest to success let's start by getting to know you!")
     with middle_row.container():
     
-        user_name = st.text_input("What's your name? 💬")
+        user_name = st.text_input("What's your name? 💬",key="key_2")
         col1, col2, col3 = st.columns(3)
         with col1:
             chosen_lang = st.radio("Prefered pratice language: 💻", ('Python', 'C++', 'JavaScript'))

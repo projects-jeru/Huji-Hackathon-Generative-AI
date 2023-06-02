@@ -91,7 +91,7 @@ elif state.started == "question":
             
         st.title("Answer the following question ✍️")
         st.write(state.question)
-        state.user_code = st_ace.st_ace(language="python") 
+        state.user_code = st_ace.st_ace(language="python", auto_update=True) 
         Submit, run = st.columns(2)
         st.text(state.out)
         Submit.button("Submit Answer 📫",on_click=__feedback_maker)

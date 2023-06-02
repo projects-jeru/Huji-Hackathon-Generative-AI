@@ -11,7 +11,7 @@ import openai
 RATING_REGEX = r"\[( ?\'(?P<DIGITS>[0-9]|10)\'?,? ?){6}\]"
 INT_REGEX = r"\b\d+\b"
 
-openai.api_key = "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"
+openai.api_key = "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"
 cur_question = None
 cur_answer = None
 chat_answer = None
@@ -84,7 +84,8 @@ question = '''
 Analyse this answer for the question above based on the topics of:
  Readability and Formatting(Code Style and Conventions) , 
  Logic and Structure, Input Handling, Efficiency, Modularity, Error Handling. 
- Then give it a rating of 1-10 (1 being the worst and 10 being the best):
+ Then give it a rating of 1-10 (1 being the worst and 10 being the best). Be very very nice, 
+ fun and positive when you give the feedback:
 {answer}
 """
 

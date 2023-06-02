@@ -1,7 +1,3 @@
-import langchain as lc
-from langchain import PromptTemplate, OpenAI, LLMChain
-from langchain.prompts import load_prompt
-import wikipedia
 import os
 import streamlit as st
 import re

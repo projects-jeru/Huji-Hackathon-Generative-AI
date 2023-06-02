@@ -11,7 +11,7 @@ import openai
 RATING_REGEX = r"\[( ?\'(?P<DIGITS>[0-9]|10)\'?,? ?){6}\]"
 INT_REGEX = r"\b\d+\b"
 
-openai.api_key = "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"
+openai.api_key = st.secrets["api_key"]
 cur_question = None
 cur_answer = None
 chat_answer = None

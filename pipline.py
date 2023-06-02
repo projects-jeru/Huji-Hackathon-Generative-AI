@@ -5,13 +5,15 @@ import wikipedia
 import os
 import streamlit as st
 import re
+from app import get_key
 
 import openai
 
 RATING_REGEX = r"\[( ?\'(?P<DIGITS>[0-9]|10)\'?,? ?){6}\]"
 INT_REGEX = r"\b\d+\b"
+openai.api_key = get_key()
 
-openai.api_key = st.secrets["api_key"]
+
 cur_question = None
 cur_answer = None
 chat_answer = None

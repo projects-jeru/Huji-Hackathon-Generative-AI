@@ -44,7 +44,8 @@ def __run_code():
                     ).stdout
 
 
-# First Screen - Getting user's info.
+# Home Screen
+
 if not state.user_live:
     with header_row.container():
         st.title("Hi, I'm Codi! 👋 \n Before you begin your quest to success let's start by getting to know you!")
@@ -84,7 +85,7 @@ if not state.user_live:
     
     print(state.user_profile)
     
-# Second Screen - Questions
+# Questions Prompt Screen
 
 elif state.started == "question":
     with header_row.container():
@@ -98,6 +99,7 @@ elif state.started == "question":
         run.button("Run Code ▶️",on_click=__run_code)
             
 
+# Feedback Screen
 elif state.started == "feedback":
     with header_row.container():
         
